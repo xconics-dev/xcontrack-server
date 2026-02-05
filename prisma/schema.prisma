@@ -1,0 +1,726 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider     = "postgresql"
+  relationMode = "foreignKeys"
+}
+
+model Lender {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  lenderCode               String                    @unique
+  lenderName               String
+  lenderType               LenderType
+  contactPersonName        String
+  contactMobile            String
+  contactEmail             String
+  registeredAddress        String
+  state                    String
+  region                   String
+  gstNumber                String?
+  panNumber                String?
+  billingCycle             BillingCycle
+  paymentTermsDays         Int
+  ldApplicable             Boolean
+  ldPercentageCap          Float?
+  pilotStartDate           DateTime?
+  pilotEndDate             DateTime?
+  agreementStartDate       DateTime
+  agreementEndDate         DateTime?
+  status                   LenderStatus              @default(ACTIVE)
+  remarks                  String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  installationRequisitions InstallationRequisition[]
+  branches                 LenderBranch[]
+  User                     User[]
+}
+
+model LenderBranch {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  lenderId                 String                    @db.Uuid
+  branchCode               String                    @unique
+  branchName               String
+  branchType               BranchType
+  contactPersonName        String
+  contactMobile            String
+  contactEmail             String
+  address                  String
+  state                    String
+  district                 String
+  pincode                  String
+  latitude                 Float?
+  longitude                Float?
+  locationUpdatedAt        DateTime?
+  billingApplicable        Boolean
+  status                   BranchStatus              @default(ACTIVE)
+  remarks                  String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  installationRequisitions InstallationRequisition[]
+  lender                   Lender                    @relation(fields: [lenderId], references: [id], onDelete: Cascade)
+
+  @@unique([lenderId, branchCode])
+  @@index([lenderId])
+}
+
+model Warehouse {
+  id                  String                    @id @default(uuid()) @db.Uuid
+  warehouseCode       String                    @unique
+  warehouseName       String
+  warehouseType       WarehouseType
+  ownerType           WarehouseOwnerType
+  aggregatorId        String?                   @db.Uuid
+  address             String
+  state               String
+  district            String
+  pincode             String
+  latitude            Float?
+  longitude           Float?
+  contactPersonName   String
+  contactMobile       String
+  emailId             String
+  status              WarehouseStatus           @default(ACTIVE)
+  remarks             String?
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  devices             Device[]
+  fromDeviceMovements DeviceMovement[]          @relation("fromEntityWarehouse")
+  toDeviceMovements   DeviceMovement[]          @relation("toEntityWarehouse")
+  aggregator          Aggregator?               @relation(fields: [aggregatorId], references: [id], onDelete: Cascade)
+  pincodeMappings     WarehousePincodeMapping[]
+}
+
+model WarehousePincodeMapping {
+  id             String    @id @default(uuid()) @db.Uuid
+  warehouseId    String    @db.Uuid
+  mappingPincode String
+  state          String
+  district       String
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  warehouse      Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@unique([warehouseId, mappingPincode])
+  @@index([warehouseId])
+  @@index([mappingPincode])
+}
+
+model Aggregator {
+  id                       String                    @id @default(uuid()) @db.Uuid
+  aggregatorCode           String                    @unique
+  aggregatorName           String
+  contactPersonName        String
+  contactMobile            String
+  contactEmail             String
+  officeAddress            String
+  state                    String
+  district                 String
+  serviceCoverage          String
+  serviceType              AggregatorServiceType
+  tatHours                 Int
+  ldApplicable             Boolean                   @default(false)
+  ldPercentageCap          Float?
+  billingCycle             AggregatorBillingCycle
+  paymentTermsDays         Int
+  contractStartDate        DateTime
+  contractEndDate          DateTime?
+  bankName                 String
+  bankAccountNo            String
+  ifscCode                 String
+  gstNumber                String?
+  panNumber                String?
+  status                   AggregatorStatus          @default(ACTIVE)
+  remarks                  String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  fieldEngineers           FieldEngineer[]
+  installationRequisitions InstallationRequisition[]
+  supportTickets           SupportTicket[]
+  User                     User[]
+  warehouses               Warehouse[]
+}
+
+model FieldEngineer {
+  id                              String                           @id @default(uuid()) @db.Uuid
+  engineerCode                    String                           @unique
+  engineerName                    String
+  mobileNo                        String
+  emailId                         String
+  aggregatorId                    String?                          @db.Uuid
+  branchCode                      String
+  employmentType                  EngineerEmploymentType
+  state                           String
+  district                        String
+  baseLocation                    String
+  skillSet                        EngineerSkill[]
+  assignedDeviceCount             Int                              @default(0)
+  status                          EngineerStatus                   @default(ACTIVE)
+  joiningDate                     DateTime
+  lastWorkingDate                 DateTime?
+  idProofType                     EngineerIdProofType
+  idProofNumber                   String
+  currentLatitude                 Float?
+  currentLongitude                Float?
+  locationUpdatedAt               DateTime?
+  remarks                         String?
+  createdAt                       DateTime                         @default(now())
+  updatedAt                       DateTime                         @updatedAt
+  LoginStatus                     EngineerLoginStatus              @default(LOGGED_OFF)
+  fromDeviceMovements             DeviceMovement[]                 @relation("fromEntityFieldEngineer")
+  toDeviceMovements               DeviceMovement[]                 @relation("toEntityFieldEngineer")
+  aggregator                      Aggregator?                      @relation(fields: [aggregatorId], references: [id], onDelete: Cascade)
+  fieldEngineerLocationLogs       FieldEngineerLocationLog[]
+  pincodeMappings                 FieldEngineerPincodeMapping[]
+  installationAadhaarVerifed      InstallationRequisition[]        @relation("aadhaarVerifiedByFieldEngineer")
+  installationChecklistVerifed    InstallationRequisition[]        @relation("checklistVerifiedByFieldEngineer")
+  installationRequisitionRequests InstallationRequisitionRequest[]
+  supportAadhaarVerifed           SupportTicket[]                  @relation("aadhaarVerifiedBySupportFieldEngineer")
+  supportChecklistVerifed         SupportTicket[]                  @relation("checklistVerifiedBySupportFieldEngineer")
+  supportTicketRequests           SupportTicketRequest[]
+  User                            User?
+
+  @@index([aggregatorId])
+  @@index([engineerCode])
+  @@index([mobileNo])
+}
+
+model FieldEngineerPincodeMapping {
+  id              String        @id @default(uuid()) @db.Uuid
+  fieldEngineerId String        @db.Uuid
+  mappingPincode  String
+  state           String
+  district        String
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  fieldEngineer   FieldEngineer @relation(fields: [fieldEngineerId], references: [id], onDelete: Cascade)
+
+  @@unique([fieldEngineerId, mappingPincode])
+  @@index([fieldEngineerId])
+  @@index([mappingPincode])
+}
+
+model FieldEngineerLocationLog {
+  id              String        @id @default(uuid()) @db.Uuid
+  fieldEngineerId String        @db.Uuid
+  lat             Float
+  long            Float
+  timestamp       DateTime      @default(now())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  fieldEngineer   FieldEngineer @relation(fields: [fieldEngineerId], references: [id], onDelete: Cascade)
+
+  @@index([fieldEngineerId])
+}
+
+model DeviceMovement {
+  id                        String                   @id @default(uuid()) @db.Uuid
+  movementType              DeviceMovementType
+  fromEntityType            MovementEntityType
+  toEntityType              MovementEntityType
+  movementDate              DateTime
+  dispatchedAt              DateTime?
+  receivedAt                DateTime?
+  movementStatus            DeviceMovementStatus     @default(IN_TRANSIT)
+  handoverProof             String?
+  remarks                   String?
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  deviceId                  String                   @db.Uuid
+  fromEntityFieldEngineerId String?                  @db.Uuid
+  fromEntityVehicleId       String?                  @db.Uuid
+  fromEntityWarehouseId     String?                  @db.Uuid
+  toEntityFieldEngineerId   String?                  @db.Uuid
+  toEntityVehicleId         String?                  @db.Uuid
+  toEntityWarehouseId       String?                  @db.Uuid
+  createdById               String?                  @db.Uuid
+  createdBy                 User?                    @relation(fields: [createdById], references: [id])
+  device                    Device                   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  fromEntityFieldEngineer   FieldEngineer?           @relation("fromEntityFieldEngineer", fields: [fromEntityFieldEngineerId], references: [id])
+  fromEntityVehicle         InstallationRequisition? @relation("fromEntityVehicle", fields: [fromEntityVehicleId], references: [id])
+  fromEntityWarehouse       Warehouse?               @relation("fromEntityWarehouse", fields: [fromEntityWarehouseId], references: [id])
+  toEntityFieldEngineer     FieldEngineer?           @relation("toEntityFieldEngineer", fields: [toEntityFieldEngineerId], references: [id])
+  toEntityVehicle           InstallationRequisition? @relation("toEntityVehicle", fields: [toEntityVehicleId], references: [id])
+  toEntityWarehouse         Warehouse?               @relation("toEntityWarehouse", fields: [toEntityWarehouseId], references: [id])
+
+  @@index([deviceId])
+  @@index([movementType])
+  @@index([movementStatus])
+}
+
+model InstallationRequisition {
+  id                               String                           @id @default(uuid()) @db.Uuid
+  requisitionNo                    String                           @unique
+  lenderId                         String                           @db.Uuid
+  branchId                         String                           @db.Uuid
+  vehicleNo                        String                           @unique
+  customerName                     String
+  customerMobile                   String
+  installationAddress              String
+  state                            String
+  district                         String
+  latitude                         Float?
+  longitude                        Float?
+  deviceType                       InstallationDeviceType           @default(GPS)
+  quantity                         Int?
+  priority                         InstallationPriority             @default(NORMAL)
+  requestedAt                      DateTime                         @default(now())
+  preferredInstallationDate        DateTime?
+  assignedAggregatorId             String?                          @db.Uuid
+  tatHours                         Int
+  installationFinishTimeAssigned   DateTime?
+  status                           InstallationStatus               @default(PENDING)
+  completedAt                      DateTime?
+  /// *
+  /// * ---------- Customer Identity (KYC – Aadhaar) ----------
+  customerAadhaarNo                String?
+  aadhaarVerificationStatus        AadhaarVerificationStatus        @default(NOT_VERIFIED)
+  aadhaarVerifiedAt                DateTime?
+  /// *
+  /// * ---------- Vehicle & Customer Proof ----------
+  vehicleNumberPlateImage          String?
+  vehicleImage                     String?
+  customerImage                    String?
+  gsmChecklist                     ChecklistStatus?
+  gsmSignalStrength                Int?
+  gpsChecklist                     ChecklistStatus?
+  gpsSatelliteCount                Int?
+  mainPowerChecklist               ChecklistStatus?
+  batteryBackupStatus              BatteryBackupStatus?
+  checklistVerifiedAt              DateTime?
+  /// *
+  /// * ---------- Meta ----------
+  remarks                          String?
+  createdAt                        DateTime                         @default(now())
+  updatedAt                        DateTime                         @updatedAt
+  pincode                          String
+  checklistVerifiedBy              String?                          @db.Uuid
+  requestedBy                      String?                          @db.Uuid
+  aadhaarVerifiedBy                String?                          @db.Uuid
+  xconicsValidation                Boolean                          @default(false)
+  device                           Device?
+  fromDeviceMovements              DeviceMovement[]                 @relation("fromEntityVehicle")
+  toDeviceMovements                DeviceMovement[]                 @relation("toEntityVehicle")
+  DeviceTracking                   DeviceTracking[]
+  aadhaarVerifiedByFieldEngineer   FieldEngineer?                   @relation("aadhaarVerifiedByFieldEngineer", fields: [aadhaarVerifiedBy], references: [id])
+  assignedAggregator               Aggregator?                      @relation(fields: [assignedAggregatorId], references: [id])
+  branch                           LenderBranch                     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  checklistVerifiedByFieldEngineer FieldEngineer?                   @relation("checklistVerifiedByFieldEngineer", fields: [checklistVerifiedBy], references: [id])
+  lender                           Lender                           @relation(fields: [lenderId], references: [id], onDelete: Cascade)
+  requestedByUser                  User?                            @relation(fields: [requestedBy], references: [id])
+  installationRequisitionRequests  InstallationRequisitionRequest[]
+  supportTickets                   SupportTicket[]
+
+  @@index([lenderId])
+  @@index([branchId])
+  @@index([assignedAggregatorId])
+  @@index([status])
+  @@index([vehicleNo])
+}
+
+model InstallationRequisitionRequest {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  installationRequisitionId String                  @db.Uuid
+  assignedEngineerId        String                  @db.Uuid
+  engineerAcceptTicket      Boolean?
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  assignedEngineer          FieldEngineer           @relation(fields: [assignedEngineerId], references: [id], onDelete: Cascade)
+  installationRequisition   InstallationRequisition @relation(fields: [installationRequisitionId], references: [id], onDelete: Cascade)
+
+  @@unique([installationRequisitionId, assignedEngineerId])
+  @@index([installationRequisitionId])
+}
+
+model SupportTicket {
+  id                               String                    @id @default(uuid()) @db.Uuid
+  installationRequisitionId        String                    @db.Uuid
+  ticketNo                         String                    @unique
+  issueDetail                      String
+  supportAddress                   String
+  state                            String
+  district                         String
+  pincode                          String
+  requestedBy                      String?                   @db.Uuid
+  requestedAt                      DateTime                  @default(now())
+  preferredSupportDate             DateTime?
+  assignedAggregatorId             String?                   @db.Uuid
+  tatHours                         Int
+  supportFinishTimeAssigned        DateTime?
+  status                           SupportStatus             @default(PENDING)
+  completedAt                      DateTime?
+  /// *
+  /// * ---------- Customer Identity (KYC – Aadhaar) ----------
+  aadhaarVerificationStatus        AadhaarVerificationStatus @default(NOT_VERIFIED)
+  aadhaarVerifiedBy                String?                   @db.Uuid
+  aadhaarVerifiedAt                DateTime?
+  /// *
+  /// * ---------- Vehicle & Customer Proof ----------
+  vehicleNumberPlateImage          String?
+  vehicleImage                     String?
+  customerImage                    String?
+  /// *
+  /// * ---------- Device Installation Checklist ----------
+  gsmChecklist                     ChecklistStatus?
+  gsmSignalStrength                Int?
+  gpsChecklist                     ChecklistStatus?
+  gpsSatelliteCount                Int?
+  mainPowerChecklist               ChecklistStatus?
+  batteryBackupStatus              BatteryBackupStatus?
+  checklistVerifiedBy              String?                   @db.Uuid
+  checklistVerifiedAt              DateTime?
+  xconicsValidation                Boolean                   @default(false)
+  /// *
+  /// * ---------- Meta ----------
+  remarks                          String?
+  createdAt                        DateTime                  @default(now())
+  updatedAt                        DateTime                  @updatedAt
+  aadhaarVerifiedByFieldEngineer   FieldEngineer?            @relation("aadhaarVerifiedBySupportFieldEngineer", fields: [aadhaarVerifiedBy], references: [id])
+  assignedAggregator               Aggregator?               @relation(fields: [assignedAggregatorId], references: [id])
+  checklistVerifiedByFieldEngineer FieldEngineer?            @relation("checklistVerifiedBySupportFieldEngineer", fields: [checklistVerifiedBy], references: [id])
+  installationRequisition          InstallationRequisition   @relation(fields: [installationRequisitionId], references: [id], onDelete: Cascade)
+  requestedByUser                  User?                     @relation(fields: [requestedBy], references: [id])
+  supportTicketRequests            SupportTicketRequest[]
+
+  @@index([assignedAggregatorId])
+  @@index([status])
+}
+
+model SupportTicketRequest {
+  id                   String        @id @default(uuid()) @db.Uuid
+  supportTicketId      String        @db.Uuid
+  assignedEngineerId   String        @db.Uuid
+  engineerAcceptTicket Boolean?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  assignedEngineer     FieldEngineer @relation(fields: [assignedEngineerId], references: [id], onDelete: Cascade)
+  supportTicket        SupportTicket @relation(fields: [supportTicketId], references: [id], onDelete: Cascade)
+
+  @@unique([supportTicketId, assignedEngineerId])
+  @@index([supportTicketId])
+}
+
+model User {
+  id                                 String                    @id @default(uuid()) @db.Uuid
+  email                              String                    @unique
+  password                           String
+  type                               userType
+  aggregatorId                       String?                   @db.Uuid
+  lenderId                           String?                   @db.Uuid
+  fieldEngineerId                    String?                   @unique @db.Uuid
+  createdAt                          DateTime                  @default(now())
+  updatedAt                          DateTime                  @updatedAt
+  createdDeviceMovements             DeviceMovement[]
+  installationRequisitionRequestedBy InstallationRequisition[]
+  supportTicketRequestedBy           SupportTicket[]
+  aggregator                         Aggregator?               @relation(fields: [aggregatorId], references: [id], onDelete: Cascade)
+  fieldEngineer                      FieldEngineer?            @relation(fields: [fieldEngineerId], references: [id], onDelete: Cascade)
+  lender                             Lender?                   @relation(fields: [lenderId], references: [id], onDelete: Cascade)
+}
+
+model Device {
+  id                        String                   @id @default(uuid()) @db.Uuid
+  imei                      String                   @unique
+  qr                        String                   @unique
+  locationType              LocationType             @default(PRODUCTION_FLOOR)
+  locationProductionFloor   String                   @default("PF-1")
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+  productionWarehouseId     String                   @db.Uuid
+  installationRequisitionId String?                  @unique @db.Uuid
+  installationRequisition   InstallationRequisition? @relation(fields: [installationRequisitionId], references: [id])
+  productionWarehouse       Warehouse                @relation(fields: [productionWarehouseId], references: [id], onDelete: Cascade)
+  deviceMovements           DeviceMovement[]
+  deviceTracking            DeviceTracking[]
+}
+
+model DeviceTracking {
+  id                String                  @id @default(uuid()) @db.Uuid
+  vehicleNumber     String
+  trackingTimestamp DateTime
+  latitude          Float
+  longitude         Float
+  altitude          Float?
+  speed             Float?
+  heading           Float?
+  gsmSignalStrength Int?
+  satelliteCount    Int?
+  batteryVoltage    Float?
+  ignitionStatus    IgnitionStatus?
+  tamperStatus      TamperStatus?
+  powerStatus       PowerStatus?
+  theftAlert        Boolean                 @default(false)
+  tamperAlert       Boolean                 @default(false)
+  lowBatteryAlert   Boolean                 @default(false)
+  dataSource        TrackingDataSource      @default(HTTP)
+  isValid           Boolean                 @default(true)
+  processedAt       DateTime?
+  createdAt         DateTime                @default(now())
+  deviceId          String                  @db.Uuid
+  cog               Float?
+  csq               Float?
+  hdop              Float?
+  pdop              Float?
+  device            Device                  @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  Vehicle           InstallationRequisition @relation(fields: [vehicleNumber], references: [vehicleNo], onDelete: Cascade)
+
+  @@index([deviceId])
+  @@index([vehicleNumber])
+  @@index([trackingTimestamp])
+  @@index([isValid])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AlertPackets {
+  sln               Int       @id @default(autoincrement())
+  packet_type       String?   @db.VarChar
+  imei              String?   @db.VarChar
+  packet            String?   @db.VarChar
+  time_stamp_server DateTime? @default(now()) @db.Timestamptz(6)
+  main_power        Boolean?
+  tamper            Boolean?
+  latitude          Float?
+  longitude         Float?
+  epoch_time        Decimal?  @db.Decimal
+
+  @@index([imei], map: "ix_alertpackets_imei")
+}
+
+model DataPackets {
+  sln               Int       @id(map: "data_packets_pkey") @default(autoincrement())
+  packet_type       String?   @db.VarChar
+  imei              String    @db.VarChar(15)
+  packet            String?   @db.VarChar
+  time_stamp_server DateTime? @default(now()) @db.Timestamptz(6)
+  processed         Boolean
+  mqtt_topic        String?   @db.VarChar
+  battery_voltage   BigInt?
+  main_power        Boolean?
+  epoch_time        Decimal?  @db.Decimal
+  latitude          Float?
+  longitude         Float?
+  satelite          String?   @db.VarChar
+  speed             String?   @db.VarChar
+  cog               String?   @db.VarChar
+  network_strength  Int?      @db.SmallInt
+  altitude          String?   @db.VarChar
+  custom_field1     String?   @db.VarChar
+  custom_field2     String?   @db.VarChar
+  custom_field3     String?   @db.VarChar
+  custom_field4     String?   @db.VarChar
+  custom_field5     String?   @db.VarChar
+  column_field6     String?   @db.VarChar
+
+  @@index([imei], map: "ix_datapackets_imei")
+  @@index([packet_type], map: "ix_datapackets_packet_type")
+  @@index([sln], map: "ix_datapackets_sln")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model HealthPackets {
+  sln               BigInt    @id @default(autoincrement())
+  packet_type       String?   @db.VarChar
+  imei              String?   @db.VarChar
+  packet            String?   @db.VarChar
+  time_stamp_server DateTime? @default(now()) @db.Timestamptz(6)
+  connecttion       Boolean?
+  battery_voltage   BigInt?
+  main_power        Boolean?
+  latitude          Float?
+  longitude         Float?
+  epoch_time        Decimal?  @db.Decimal
+}
+
+enum LenderType {
+  NBFC
+  BANK
+  LEASING
+}
+
+enum BillingCycle {
+  WEEKLY
+  FORTNIGHTLY
+  MONTHLY
+}
+
+enum LenderStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum BranchType {
+  HO
+  REGIONAL
+  AREA
+  BRANCH
+}
+
+enum BranchStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum WarehouseType {
+  PRODUCTION
+  LOCAL
+  REGIONAL
+}
+
+enum WarehouseOwnerType {
+  XCONICS
+  AGGREGATOR
+}
+
+enum WarehouseStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AggregatorServiceType {
+  INSTALLATION
+  REPAIR
+  BOTH
+}
+
+enum AggregatorBillingCycle {
+  WEEKLY
+  FORTNIGHTLY
+}
+
+enum AggregatorStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum EngineerEmploymentType {
+  XCONICS
+  AGGREGATOR
+}
+
+enum EngineerStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+}
+
+enum EngineerSkill {
+  GPS
+  CAMERA
+  ELECTRICAL
+}
+
+enum EngineerIdProofType {
+  AADHAAR
+  DL
+  PAN
+}
+
+enum EngineerLoginStatus {
+  LOGGED_IN
+  LOGGED_OFF
+}
+
+enum DeviceMovementType {
+  PROD_TO_WH
+  WH_TO_ENGINEER
+  ENGINEER_TO_VEHICLE
+}
+
+enum MovementEntityType {
+  PRODUCTION_WAREHOUSE
+  WAREHOUSE
+  ENGINEER
+  VEHICLE
+}
+
+enum DeviceMovementStatus {
+  IN_TRANSIT
+  RECEIVED
+  CANCELLED
+}
+
+enum InstallationDeviceType {
+  GPS
+  CAMERA
+  SENSOR
+}
+
+enum InstallationPriority {
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum InstallationStatus {
+  NEW
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  PENDING
+  ACCEPTED
+}
+
+enum AadhaarVerificationStatus {
+  VERIFIED
+  NOT_VERIFIED
+}
+
+enum ChecklistStatus {
+  PASS
+  FAIL
+}
+
+enum BatteryBackupStatus {
+  OK
+  NOT_OK
+}
+
+enum SupportStatus {
+  NEW
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  PENDING
+  ACCEPTED
+}
+
+enum userType {
+  XCONICS
+  AGGREGATOR
+  LENDER
+  FIELD_ENGINEER
+}
+
+enum LocationType {
+  PRODUCTION_FLOOR
+  WAREHOUSE
+  FIELD_ENGINEER
+  VEHICLE
+}
+
+enum IgnitionStatus {
+  ON
+  OFF
+}
+
+enum TamperStatus {
+  NORMAL
+  TAMPER
+}
+
+enum PowerStatus {
+  EXTERNAL
+  BATTERY
+}
+
+enum TrackingDataSource {
+  MQTT
+  TCP
+  HTTP
+}

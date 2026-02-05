@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Device" ALTER COLUMN "locationType" SET DEFAULT 'PRODUCTION_FLOOR';
