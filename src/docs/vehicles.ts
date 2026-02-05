@@ -1,13 +1,18 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { z } from "../validators/index.js";
-import { vechileAlertPacketResponseZodSchema, vechileDataPacketResponseZodSchema, vehicleResponseZodSchema } from "../validators/vehicles/index.js";
+import {
+  vechileAlertPacketResponseZodSchema,
+  vechileDataPacketResponseZodSchema,
+  vechileHealthPacketResponseZodSchema,
+  vehicleHealthPacketZodSchema,
+  vehicleResponseZodSchema,
+} from "../validators/vehicles/index.js";
 import { commonQueryParamsZodSchema } from "../validators/common/index.js";
 
 export const vehiclesRegistry = new OpenAPIRegistry();
 
 // Components
 vehiclesRegistry.register("vehicleResponse", vehicleResponseZodSchema);
-
 
 // Get single vehicle by vehicleNo
 vehiclesRegistry.registerPath({
@@ -62,6 +67,31 @@ vehiclesRegistry.registerPath({
 });
 
 // Alert packets paths
+vehiclesRegistry.registerPath({
+  tags: ["vehicles"],
+  method: "get",
+  path: "/vehicles/alerts/list",
+  summary: "List vehicles with optional search, offset, and limit",
+  security: [{ bearerAuth: [] }], // 🔒 requires JWT
+  request: {
+    query: commonQueryParamsZodSchema,
+  },
+  responses: {
+    200: {
+      description: "Returns list of vehicles from db.",
+      content: {
+        "application/json": {
+          schema: z.object({
+            data: z.array(vehicleResponseZodSchema),
+            message: z.string(),
+            maxPage: z.number(),
+          }),
+        },
+      },
+    },
+  },
+});
+
 vehiclesRegistry.registerPath({
   tags: ["vehicles"],
   method: "get",
@@ -121,7 +151,8 @@ vehiclesRegistry.registerPath({
   },
   responses: {
     200: {
-      description: "Returns details of the deleted alert packet for the specified SLN.",
+      description:
+        "Returns details of the deleted alert packet for the specified SLN.",
       content: {
         "application/json": {
           schema: z.object({
@@ -134,8 +165,31 @@ vehiclesRegistry.registerPath({
   },
 });
 
-
 // Data packets paths
+vehiclesRegistry.registerPath({
+  tags: ["vehicles"],
+  method: "get",
+  path: "/vehicles/data/list",
+  summary: "List all data packets",
+  security: [{ bearerAuth: [] }], // 🔒 requires JWT
+  request: {
+    query: commonQueryParamsZodSchema,
+  },
+  responses: {
+    200: {
+      description: "Returns list of all data packets.",
+      content: {
+        "application/json": {
+          schema: z.object({
+            data: z.array(vechileDataPacketResponseZodSchema), // Replace z.any() with actual data packet schema
+            message: z.string(),
+          }),
+        },
+      },
+    },
+  },
+});
+
 vehiclesRegistry.registerPath({
   tags: ["vehicles"],
   method: "get",
@@ -151,7 +205,7 @@ vehiclesRegistry.registerPath({
       content: {
         "application/json": {
           schema: z.object({
-            data: z.array(vechileDataPacketResponseZodSchema), 
+            data: z.array(vechileDataPacketResponseZodSchema),
             message: z.string(),
           }),
         },
@@ -175,7 +229,111 @@ vehiclesRegistry.registerPath({
       content: {
         "application/json": {
           schema: z.object({
-            data: vechileDataPacketResponseZodSchema, 
+            data: vechileDataPacketResponseZodSchema,
+            message: z.string(),
+          }),
+        },
+      },
+    },
+  },
+});
+
+// Health packets paths
+
+vehiclesRegistry.registerPath({
+  tags: ["vehicles"],
+  method: "post",
+  path: "/vehicles/healthpacket/create",
+  summary: "Create a new health packet",
+  security: [{ bearerAuth: [] }], // 🔒 requires JWT
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: vehicleHealthPacketZodSchema },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Returns details of the created health packet.",
+      content: {
+        "application/json": {
+          schema: z.object({
+            data: vechileHealthPacketResponseZodSchema, // Replace z.any() with actual health packet schema
+            message: z.string(),
+          }),
+        },
+      },
+    },
+  },
+});
+
+vehiclesRegistry.registerPath({
+  tags: ["vehicles"],
+  method: "get",
+  path: "/vehicles/healthpacket/list/{imei}",
+  summary: "List health packets for a vehicle by IMEI",
+  security: [{ bearerAuth: [] }], // 🔒 requires JWT
+  request: {
+    params: z.object({ imei: z.string() }),
+  },
+  responses: {
+    200: {
+      description: "Returns list of health packets for the specified IMEI.",
+      content: {
+        "application/json": {
+          schema: z.object({
+            data: z.array(vechileHealthPacketResponseZodSchema), // Replace z.any() with actual health packet schema
+            message: z.string(),
+          }),
+        },
+      },
+    },
+  },
+});
+
+vehiclesRegistry.registerPath({
+  tags: ["vehicles"],
+  method: "get",
+  path: "/vehicles/healthpacket/details/{sln}",
+  summary: "Get health packet details by SLN",
+  security: [{ bearerAuth: [] }], // 🔒 requires JWT
+  request: {
+    params: z.object({ sln: z.string() }),
+  },
+  responses: {
+    200: {
+      description:
+        "Returns details of the health packet for the specified SLN.",
+      content: {
+        "application/json": {
+          schema: z.object({
+            data: vechileHealthPacketResponseZodSchema, // Replace z.any() with actual health packet schema
+            message: z.string(),
+          }),
+        },
+      },
+    },
+  },
+});
+
+vehiclesRegistry.registerPath({
+  tags: ["vehicles"],
+  method: "delete",
+  path: "/vehicles/healthpacket/delete/{sln}",
+  summary: "Delete a health packet by SLN",
+  security: [{ bearerAuth: [] }], // 🔒 requires JWT
+  request: {
+    params: z.object({ sln: z.string() }),
+  },
+  responses: {
+    200: {
+      description:
+        "Returns details of the deleted health packet for the specified SLN.",
+      content: {
+        "application/json": {
+          schema: z.object({
+            data: vechileHealthPacketResponseZodSchema, // Replace z.any() with actual health packet schema
             message: z.string(),
           }),
         },

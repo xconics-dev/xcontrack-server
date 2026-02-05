@@ -2,7 +2,7 @@ import prisma from "../index.js";
 import Config from "../../config/index.js";
 import { Prisma } from "../../generated/prisma/client.js";
 import {
-  VehicleAlertPacketZodType,
+  VehicleHealthPacketZodType,
   VehicleZodType,
 } from "../../validators/vehicles/index.js";
 
@@ -97,6 +97,16 @@ const vehiclesDb = {
       throw error;
     }
   },
+  allAlertsList: async () => {
+    try {
+      const alerts = await prisma.alertPackets.findMany({
+        orderBy: { time_stamp_server: "desc" },
+      });
+      return alerts;
+    } catch (error) {
+      throw error;
+    }
+  },
   alertsList: async (imei: string) => {
     try {
       const alerts = await prisma.alertPackets.findMany({
@@ -139,12 +149,63 @@ const vehiclesDb = {
       throw error;
     }
   },
+  allDataPacketList: async () => {
+    try {
+      const dataPackets = await prisma.dataPackets.findMany({
+        orderBy: { time_stamp_server: "desc" },
+      });
+      return dataPackets;
+    } catch (error) {
+      throw error;
+    }
+  },
   dataPacketDetails: async (sln: number) => {
     try {
       const dataPacket = await prisma.dataPackets.findUniqueOrThrow({
         where: { sln },
       });
       return dataPacket;
+    } catch (error) {
+      throw error;
+    }
+  },
+  healthPacketList: async (imei: string) => {
+    try {
+      const healthPackets = await prisma.healthPackets.findMany({
+        where: { imei },
+        orderBy: { time_stamp_server: "desc" },
+      });
+      return healthPackets;
+    } catch (error) {
+      throw error;
+    }
+  },
+  healthPacketDetails: async (sln: number) => {
+    try {
+      const healthPacket = await prisma.healthPackets.findUniqueOrThrow({
+        where: { sln },
+      });
+      return healthPacket;
+    } catch (error) {
+      throw error;
+    }
+  },
+  healthPacketDelete: async (sln: number) => {
+    try {
+      const healthPacket = await prisma.healthPackets.delete({
+        where: { sln },
+      });
+      return healthPacket;
+    } catch (error) {
+      throw error;
+    }
+  },
+  healthpacketCreate: async (packetInfo: VehicleHealthPacketZodType) => {
+    try {
+      const healthPacket = await prisma.healthPackets.create({
+        data: packetInfo,
+      });
+      return healthPacket;
     } catch (error) {
       throw error;
     }

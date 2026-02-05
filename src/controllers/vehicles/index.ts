@@ -40,6 +40,15 @@ const vehiclesController = {
       data: alerts,
     });
   },
+  allAlertsList: async (req: Request, res: Response) => {
+    // db call
+    const alerts = await vehiclesDb.allAlertsList();
+    // send response
+    return res.json({
+      message: "all alerts list successfully",
+      data: alerts,
+    });
+  },
   alertDetails: async (req: Request, res: Response) => {
     // extract sln
     const { sln } = req.params;
@@ -73,6 +82,15 @@ const vehiclesController = {
       data: dataPackets,
     });
   },
+  allDataPacketList: async (req: Request, res: Response) => {
+    // db call
+    const dataPackets = await vehiclesDb.allDataPacketList();
+    // send response
+    return res.json({
+      message: "all data packets list successfully",
+      data: dataPackets,
+    });
+  },
   dataPacketDetails: async (req: Request, res: Response) => {
     // extract sln
     const { sln } = req.params;
@@ -82,6 +100,52 @@ const vehiclesController = {
     return res.json({
       message: "data packet details fetched successfully",
       data: dataPacket,
+    });
+  },
+
+  // health packet list
+  healthPacketList: async (req: Request, res: Response) => {
+    // extract imei
+    const { imei } = req.params;
+    // db call
+    const healthPackets = await vehiclesDb.healthPacketList(imei);
+    // send response
+    return res.json({
+      message: "health packets list successfully",
+      data: healthPackets,
+    });
+  },
+  healthPacketDetails: async (req: Request, res: Response) => {
+    // extract sln
+    const { sln } = req.params;
+    // db call
+    const healthPacket = await vehiclesDb.healthPacketDetails(Number(sln));
+    // send response
+    return res.json({
+      message: "health packet details fetched successfully",
+      data: healthPacket,
+    });
+  },
+  healthPacketDelete: async (req: Request, res: Response) => {
+    // extract sln
+    const { sln } = req.params;
+    // db call
+    const healthPacket = await vehiclesDb.healthPacketDelete(Number(sln));
+    // send response
+    return res.json({
+      message: "health packet deleted successfully",
+      data: healthPacket,
+    });
+  },
+  healthpacketCreate: async (req: Request, res: Response) => {
+    // extract packet info from body
+    const packetInfo = req.body;
+    // db call
+    const healthPacket = await vehiclesDb.healthpacketCreate(packetInfo);
+    // send response
+    return res.json({
+      message: "health packet created successfully",
+      data: healthPacket,
     });
   },
 };
