@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import vehiclesDb from "../../models/vehicles/index.js";
 import { commonQueryParamsZodSchema } from "../../validators/common/index.js";
+import {
+  VehcileAlertPacketQueryZodSchema,
+  VehcileDataPacketQueryZodSchema,
+  VehcileHealthPacketQueryZodSchema,
+} from "../../validators/vehicles/index.js";
 
 const vehiclesController = {
   read: async (req: Request, res: Response) => {
@@ -29,26 +34,21 @@ const vehiclesController = {
       maxPage,
     });
   },
+
+  // alerts paths
   alertsList: async (req: Request, res: Response) => {
     // extract imei
-    const { imei } = req.params;
+    const { imei, search, offset, limit } =
+      VehcileAlertPacketQueryZodSchema.parse(req.query);
     // db call
-    const alerts = await vehiclesDb.alertsList(imei);
+    const alerts = await vehiclesDb.alertsList(imei, search, offset, limit);
     // send response
     return res.json({
       message: "alerts list successfully",
       data: alerts,
     });
   },
-  allAlertsList: async (req: Request, res: Response) => {
-    // db call
-    const alerts = await vehiclesDb.allAlertsList();
-    // send response
-    return res.json({
-      message: "all alerts list successfully",
-      data: alerts,
-    });
-  },
+
   alertDetails: async (req: Request, res: Response) => {
     // extract sln
     const { sln } = req.params;
@@ -71,23 +71,22 @@ const vehiclesController = {
       data: alert,
     });
   },
+
+  // data packets paths
   dataPacketList: async (req: Request, res: Response) => {
     // extract imei
-    const { imei } = req.params;
+    const { imei, search, offset, limit } =
+      VehcileDataPacketQueryZodSchema.parse(req.query);
     // db call
-    const dataPackets = await vehiclesDb.dataPacketList(imei);
+    const dataPackets = await vehiclesDb.dataPacketList(
+      imei,
+      search,
+      offset,
+      limit,
+    );
     // send response
     return res.json({
       message: "data packets list successfully",
-      data: dataPackets,
-    });
-  },
-  allDataPacketList: async (req: Request, res: Response) => {
-    // db call
-    const dataPackets = await vehiclesDb.allDataPacketList();
-    // send response
-    return res.json({
-      message: "all data packets list successfully",
       data: dataPackets,
     });
   },
@@ -106,9 +105,14 @@ const vehiclesController = {
   // health packet list
   healthPacketList: async (req: Request, res: Response) => {
     // extract imei
-    const { imei } = req.params;
+    const { imei , search, offset, limit} = VehcileHealthPacketQueryZodSchema.parse(req.query);
     // db call
-    const healthPackets = await vehiclesDb.healthPacketList(imei);
+    const healthPackets = await vehiclesDb.healthPacketList(
+      imei,
+      search,
+      offset,
+      limit,
+    );
     // send response
     return res.json({
       message: "health packets list successfully",

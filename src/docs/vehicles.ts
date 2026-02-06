@@ -4,6 +4,9 @@ import {
   vechileAlertPacketResponseZodSchema,
   vechileDataPacketResponseZodSchema,
   vechileHealthPacketResponseZodSchema,
+  VehcileAlertPacketQueryZodSchema,
+  VehcileDataPacketQueryZodSchema,
+  VehcileHealthPacketQueryZodSchema,
   vehicleHealthPacketZodSchema,
   vehicleResponseZodSchema,
 } from "../validators/vehicles/index.js";
@@ -13,6 +16,11 @@ export const vehiclesRegistry = new OpenAPIRegistry();
 
 // Components
 vehiclesRegistry.register("vehicleResponse", vehicleResponseZodSchema);
+vehiclesRegistry.register("vechileAlertPacketResponse", vechileAlertPacketResponseZodSchema);
+vehiclesRegistry.register(
+  "vechileHealthPacketResponse",
+  vechileHealthPacketResponseZodSchema,
+);
 
 // Get single vehicle by vehicleNo
 vehiclesRegistry.registerPath({
@@ -66,40 +74,16 @@ vehiclesRegistry.registerPath({
   },
 });
 
+
 // Alert packets paths
 vehiclesRegistry.registerPath({
   tags: ["vehicles"],
   method: "get",
   path: "/vehicles/alerts/list",
-  summary: "List vehicles with optional search, offset, and limit",
-  security: [{ bearerAuth: [] }], // 🔒 requires JWT
-  request: {
-    query: commonQueryParamsZodSchema,
-  },
-  responses: {
-    200: {
-      description: "Returns list of vehicles from db.",
-      content: {
-        "application/json": {
-          schema: z.object({
-            data: z.array(vehicleResponseZodSchema),
-            message: z.string(),
-            maxPage: z.number(),
-          }),
-        },
-      },
-    },
-  },
-});
-
-vehiclesRegistry.registerPath({
-  tags: ["vehicles"],
-  method: "get",
-  path: "/vehicles/alerts/list/{imei}",
   summary: "List alert packets for a vehicle by IMEI",
   security: [{ bearerAuth: [] }], // 🔒 requires JWT
   request: {
-    params: z.object({ imei: z.string() }),
+    query: VehcileAlertPacketQueryZodSchema,
   },
   responses: {
     200: {
@@ -107,7 +91,7 @@ vehiclesRegistry.registerPath({
       content: {
         "application/json": {
           schema: z.object({
-            data: z.array(vechileAlertPacketResponseZodSchema), // Replace z.any() with actual alert packet schema
+            data: z.array(vechileAlertPacketResponseZodSchema),
             message: z.string(),
           }),
         },
@@ -173,7 +157,7 @@ vehiclesRegistry.registerPath({
   summary: "List all data packets",
   security: [{ bearerAuth: [] }], // 🔒 requires JWT
   request: {
-    query: commonQueryParamsZodSchema,
+    query: VehcileDataPacketQueryZodSchema, // Reusing alert packet query schema as it has common params like search, offset, limit. You can create a separate one if needed.
   },
   responses: {
     200: {
@@ -182,30 +166,6 @@ vehiclesRegistry.registerPath({
         "application/json": {
           schema: z.object({
             data: z.array(vechileDataPacketResponseZodSchema), // Replace z.any() with actual data packet schema
-            message: z.string(),
-          }),
-        },
-      },
-    },
-  },
-});
-
-vehiclesRegistry.registerPath({
-  tags: ["vehicles"],
-  method: "get",
-  path: "/vehicles/data/list/{imei}",
-  summary: "List data packets for a vehicle by IMEI",
-  security: [{ bearerAuth: [] }], // 🔒 requires JWT
-  request: {
-    params: z.object({ imei: z.string() }),
-  },
-  responses: {
-    200: {
-      description: "Returns list of data packets for the specified IMEI.",
-      content: {
-        "application/json": {
-          schema: z.object({
-            data: z.array(vechileDataPacketResponseZodSchema),
             message: z.string(),
           }),
         },
@@ -239,7 +199,6 @@ vehiclesRegistry.registerPath({
 });
 
 // Health packets paths
-
 vehiclesRegistry.registerPath({
   tags: ["vehicles"],
   method: "post",
@@ -274,8 +233,8 @@ vehiclesRegistry.registerPath({
   path: "/vehicles/healthpacket/list/{imei}",
   summary: "List health packets for a vehicle by IMEI",
   security: [{ bearerAuth: [] }], // 🔒 requires JWT
-  request: {
-    params: z.object({ imei: z.string() }),
+  request:{
+    query: VehcileHealthPacketQueryZodSchema,
   },
   responses: {
     200: {

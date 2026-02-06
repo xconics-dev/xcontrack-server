@@ -20,11 +20,6 @@ vehicleRouter
   .get(
     "/alerts/list",
     AuthMiddleware(authAccessConfig.all.auth),
-    asyncErrorHandler(vehiclesController.allAlertsList),
-  )
-  .get(
-    "/alerts/list/:imei",
-    AuthMiddleware(authAccessConfig.all.auth),
     asyncErrorHandler(vehiclesController.alertsList),
   )
   .get(
@@ -40,11 +35,6 @@ vehicleRouter
   .get(
     "/data/list",
     AuthMiddleware(authAccessConfig.all.auth),
-    asyncErrorHandler(vehiclesController.allDataPacketList),
-  )
-  .get(
-    "/data/list/:imei",
-    AuthMiddleware(authAccessConfig.all.auth),
     asyncErrorHandler(vehiclesController.dataPacketList),
   )
 
@@ -59,7 +49,7 @@ vehicleRouter
     asyncErrorHandler(vehiclesController.healthpacketCreate),
   )
   .get(
-    "/healthpacket/list/:imei",
+    "/healthpacket/list",
     AuthMiddleware(authAccessConfig.all.auth),
     asyncErrorHandler(vehiclesController.healthPacketList),
   )

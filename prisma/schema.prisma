@@ -486,7 +486,7 @@ model AlertPackets {
   latitude          Float?
   longitude         Float?
   epoch_time        Decimal?  @db.Decimal
-
+  mqtt_topic        String?   @db.VarChar
   @@index([imei], map: "ix_alertpackets_imei")
 }
 

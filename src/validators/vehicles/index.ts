@@ -8,6 +8,7 @@ import { lenderZodSchema } from "../lender/index.js";
 import { lenderBranchZodSchema } from "../lenderBranch/index.js";
 import { aggregatorZodSchema } from "../aggregator/index.js";
 import { extraFields, uuidZodSchemaGen } from "../common/index.js";
+import Config from "../../config/index.js";
 
 export type packetType = "NRM" | "HLT" | "ALT";
 
@@ -21,9 +22,9 @@ export const vehicleDataZodSchema = z.object({
   status: z.enum(InstallationStatus),
   deviceType: z.enum(InstallationDeviceType),
   device: DeviceZodSchema,
-  lender: lenderZodSchema,
-  branch: lenderBranchZodSchema,
-  assignedAggregator: aggregatorZodSchema,
+  lender: lenderZodSchema.optional(),
+  branch: lenderBranchZodSchema.optional(),
+  assignedAggregator: aggregatorZodSchema.optional(),
 });
 
 export const vehicleAlertPacketZodSchema = z.object({
@@ -35,6 +36,8 @@ export const vehicleAlertPacketZodSchema = z.object({
   tamper: z.boolean(),
   latitude: z.number(),
   longitude: z.number(),
+  main_power: z.boolean(),
+  mqtt_topic: z.string().optional(),
   epoch_time: z.number(),
 });
 
@@ -51,6 +54,8 @@ export const vehicleHealthPacketZodSchema = z.object({
   longitude: z.number(),
   epoch_time: z.number(),
 });
+
+
 
 export const vehicleDataPacketZodSchema = z.object({
   sln: z.number(),
@@ -78,7 +83,6 @@ export const vehicleDataPacketZodSchema = z.object({
   column_field6: z.string().optional(),
 });
 
-
 /* ================= TYPES ================= */
 
 export type VehicleZodType = z.infer<typeof vehicleDataZodSchema>;
@@ -91,6 +95,30 @@ export type VehicleHealthPacketZodType = z.infer<
 export type VehicleDataPacketZodType = z.infer<
   typeof vehicleDataPacketZodSchema
 >;
+
+
+// Query schemas
+export const VehcileAlertPacketQueryZodSchema = z.object({
+  offset: z.coerce.number().min(0).default(0).optional(),
+  limit: z.coerce.number().min(1).default(Config.PAGE_ITEM_COUNT).optional(),
+  search: z.string().optional(),
+  imei: z.string().optional(),
+});
+
+
+export const VehcileDataPacketQueryZodSchema = z.object({
+  offset: z.coerce.number().min(0).default(0).optional(),
+  limit: z.coerce.number().min(1).default(Config.PAGE_ITEM_COUNT).optional(),
+  search: z.string().optional(),
+  imei: z.string().optional(),
+});
+
+export const VehcileHealthPacketQueryZodSchema = z.object({
+  offset: z.coerce.number().min(0).default(0).optional(),
+  limit: z.coerce.number().min(1).default(Config.PAGE_ITEM_COUNT).optional(),
+  search: z.string().optional(),
+  imei: z.string().optional(),
+});
 
 /* ================= RESPONSE ================= */
 

@@ -21,9 +21,9 @@ const vehiclesDb = {
           status: true,
           deviceType: true,
           device: true,
-          lender: true,
-          branch: true,
-          assignedAggregator: true,
+          // lender: true,
+          // branch: true,
+          // assignedAggregator: true,
         },
       });
       return vehicle as VehicleZodType;
@@ -76,9 +76,9 @@ const vehiclesDb = {
           status: true,
           deviceType: true,
           device: true,
-          lender: true,
-          branch: true,
-          assignedAggregator: true,
+          // lender: true,
+          // branch: true,
+          // assignedAggregator: true,
         },
         orderBy: {
           requestedAt: "desc",
@@ -97,23 +97,48 @@ const vehiclesDb = {
       throw error;
     }
   },
-  allAlertsList: async () => {
+  alertsList: async (
+    imei?: string,
+    search?: string,
+    offset: number = 0,
+    limit: number = Config.PAGE_ITEM_COUNT,
+  ) => {
     try {
+      const whereClause: Prisma.AlertPacketsWhereInput = {
+        imei,
+        OR: search
+          ? [
+              {
+                packet: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              //   {
+              //     mqtt_topic: {
+              //       contains: search,
+              //       mode: Prisma.QueryMode.insensitive,
+              //     },
+              //   },
+            ]
+          : undefined,
+      };
+
       const alerts = await prisma.alertPackets.findMany({
+        where: whereClause,
+        skip: offset,
+        take: limit,
         orderBy: { time_stamp_server: "desc" },
       });
-      return alerts;
-    } catch (error) {
-      throw error;
-    }
-  },
-  alertsList: async (imei: string) => {
-    try {
-      const alerts = await prisma.alertPackets.findMany({
-        where: { imei },
-        orderBy: { time_stamp_server: "desc" },
+
+      const maxCount = await prisma.alertPackets.count({
+        where: whereClause,
       });
-      return alerts;
+
+      return {
+        alerts,
+        maxPage: Math.ceil(maxCount / limit),
+      };
     } catch (error) {
       throw error;
     }
@@ -138,23 +163,50 @@ const vehiclesDb = {
       throw error;
     }
   },
-  dataPacketList: async (imei: string) => {
+
+  // data packets paths
+  dataPacketList: async (
+    imei?: string,
+    search?: string,
+    offset: number = 0,
+    limit: number = Config.PAGE_ITEM_COUNT,
+  ) => {
     try {
+      const whereClause: Prisma.DataPacketsWhereInput = {
+        imei,
+        OR: search
+          ? [
+              {
+                packet: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              //   {
+              //     mqtt_topic: {
+              //       contains: search,
+              //       mode: Prisma.QueryMode.insensitive,
+              //     },
+              //   },
+            ]
+          : undefined,
+      };
+
       const dataPackets = await prisma.dataPackets.findMany({
-        where: { imei },
+        where: whereClause,
+        skip: offset,
+        take: limit,
         orderBy: { time_stamp_server: "desc" },
       });
-      return dataPackets;
-    } catch (error) {
-      throw error;
-    }
-  },
-  allDataPacketList: async () => {
-    try {
-      const dataPackets = await prisma.dataPackets.findMany({
-        orderBy: { time_stamp_server: "desc" },
+
+      const maxCount = await prisma.dataPackets.count({
+        where: whereClause,
       });
-      return dataPackets;
+
+      return {
+        dataPackets,
+        maxPage: Math.ceil(maxCount / limit),
+      };
     } catch (error) {
       throw error;
     }
@@ -169,13 +221,49 @@ const vehiclesDb = {
       throw error;
     }
   },
-  healthPacketList: async (imei: string) => {
+
+  healthPacketList: async (
+    imei?: string,
+    search?: string,
+    offset: number = 0,
+    limit: number = Config.PAGE_ITEM_COUNT,
+  ) => {
     try {
+      const whereClause: Prisma.HealthPacketsWhereInput = {
+        imei,
+        OR: search
+          ? [
+              {
+                packet: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              //   {
+              //     mqtt_topic: {
+              //       contains: search,
+              //       mode: Prisma.QueryMode.insensitive,
+              //     },
+              //   },
+            ]
+          : undefined,
+      };
+
       const healthPackets = await prisma.healthPackets.findMany({
-        where: { imei },
+        where: whereClause,
+        skip: offset,
+        take: limit,
         orderBy: { time_stamp_server: "desc" },
       });
-      return healthPackets;
+
+      const maxCount = await prisma.healthPackets.count({
+        where: whereClause,
+      });
+
+      return {
+        healthPackets,
+        maxPage: Math.ceil(maxCount / limit),
+      };
     } catch (error) {
       throw error;
     }
