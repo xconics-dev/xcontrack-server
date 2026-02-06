@@ -230,7 +230,7 @@ vehiclesRegistry.registerPath({
 vehiclesRegistry.registerPath({
   tags: ["vehicles"],
   method: "get",
-  path: "/vehicles/healthpacket/list/{imei}",
+  path: "/vehicles/healthpacket/list",
   summary: "List health packets for a vehicle by IMEI",
   security: [{ bearerAuth: [] }], // 🔒 requires JWT
   request:{
