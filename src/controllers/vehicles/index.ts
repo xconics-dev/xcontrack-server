@@ -5,6 +5,7 @@ import {
   VehcileAlertPacketQueryZodSchema,
   VehcileDataPacketQueryZodSchema,
   VehcileHealthPacketQueryZodSchema,
+  VehicleHealthPacketZodType,
 } from "../../validators/vehicles/index.js";
 
 const vehiclesController = {
@@ -105,7 +106,8 @@ const vehiclesController = {
   // health packet list
   healthPacketList: async (req: Request, res: Response) => {
     // extract imei
-    const { imei , search, offset, limit} = VehcileHealthPacketQueryZodSchema.parse(req.query);
+    const { imei, search, offset, limit } =
+      VehcileHealthPacketQueryZodSchema.parse(req.query);
     // db call
     const healthPackets = await vehiclesDb.healthPacketList(
       imei,
@@ -142,15 +144,38 @@ const vehiclesController = {
     });
   },
   healthpacketCreate: async (req: Request, res: Response) => {
-    // extract packet info from body
-    const packetInfo = req.body;
-    // db call
-    const healthPacket = await vehiclesDb.healthpacketCreate(packetInfo);
-    // send response
-    return res.json({
-      message: "health packet created successfully",
-      data: healthPacket,
-    });
+    try {
+      let packetInfo: string | VehicleHealthPacketZodType;
+
+      if (typeof req.body.packet === "string") {
+        packetInfo = req.body.packet;
+      } else if (typeof req.body === "string") {
+        packetInfo = req.body;
+      } else {
+        packetInfo = req.body;
+      }
+
+      const healthPacket = await vehiclesDb.healthpacketCreate(packetInfo);
+
+      // Serialize BigInt fields before response
+      const responseData = JSON.parse(
+        JSON.stringify(healthPacket, (key, value) =>
+          typeof value === "bigint" ? value.toString() : value,
+        ),
+      );
+
+      return res.status(201).json({
+        message: "health packet created successfully",
+        data: responseData,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to create health packet",
+      });
+    }
   },
 };
 

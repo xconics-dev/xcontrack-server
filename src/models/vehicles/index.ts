@@ -1,10 +1,13 @@
 import prisma from "../index.js";
 import Config from "../../config/index.js";
 import { Prisma } from "../../generated/prisma/client.js";
+import { z } from "zod";
 import {
   VehicleHealthPacketZodType,
   VehicleZodType,
+  vehicleHealthPacketZodSchema,
 } from "../../validators/vehicles/index.js";
+import { parseHealthPacket } from "../../utils/parse-healthpacket.js";
 
 const vehiclesDb = {
   read: async (vehicleNo: string) => {
@@ -288,13 +291,35 @@ const vehiclesDb = {
       throw error;
     }
   },
-  healthpacketCreate: async (packetInfo: VehicleHealthPacketZodType) => {
+  healthpacketCreate: async (
+    packetInfo: VehicleHealthPacketZodType | string,
+  ) => {
     try {
+      let data: VehicleHealthPacketZodType;
+
+      if (typeof packetInfo === "string") {
+        // Parse raw MQTT packet
+        const parsed = parseHealthPacket(packetInfo);
+        data = {
+          ...parsed,
+          sln: BigInt(Date.now()), // or use auto-increment/UUID
+          time_stamp_server: new Date(),
+        };
+      } else {
+        // Direct object input
+        data = packetInfo;
+      }
+
+      vehicleHealthPacketZodSchema.parse(data); // Validate
+
       const healthPacket = await prisma.healthPackets.create({
-        data: packetInfo,
+        data,
       });
       return healthPacket;
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(`Validation failed: ${(error as z.ZodError).message}`);
+      }
       throw error;
     }
   },

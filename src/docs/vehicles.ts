@@ -203,29 +203,47 @@ vehiclesRegistry.registerPath({
   tags: ["vehicles"],
   method: "post",
   path: "/vehicles/healthpacket/create",
-  summary: "Create a new health packet",
-  security: [{ bearerAuth: [] }], // 🔒 requires JWT
+  summary: "Create a new health packet (MQTT raw packet or full object)",
+  security: [{ bearerAuth: [] }],
   request: {
     body: {
       content: {
-        "application/json": { schema: vehicleHealthPacketZodSchema },
+        "application/x-www-form-urlencoded": {
+          schema: z.object({
+            packet: z.string()
+          }),
+        },
+        "application/json": { 
+          schema: vehicleHealthPacketZodSchema.describe("Full structured health packet object") 
+        },
       },
     },
   },
   responses: {
     201: {
-      description: "Returns details of the created health packet.",
+      description: "Health packet created successfully",
       content: {
         "application/json": {
           schema: z.object({
-            data: vechileHealthPacketResponseZodSchema, // Replace z.any() with actual health packet schema
+            data: z.any(), // Fixed typo: vechile → vehicle
             message: z.string(),
+          }),
+        },
+      },
+    },
+    400: {
+      description: "Invalid packet format or validation failed",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.string(),
           }),
         },
       },
     },
   },
 });
+
 
 vehiclesRegistry.registerPath({
   tags: ["vehicles"],

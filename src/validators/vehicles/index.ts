@@ -41,13 +41,14 @@ export const vehicleAlertPacketZodSchema = z.object({
   epoch_time: z.number(),
 });
 
+
 export const vehicleHealthPacketZodSchema = z.object({
   sln: z.bigint(),
-  packet_type: z.enum(["NRM", "HLT", "ALT"]),
+  packet_type: z.enum(["NRM", "HLM", "ALT"]),
   imei: z.string(),
   packet: z.string(),
   time_stamp_server: z.date(),
-  connection: z.boolean(),
+  connecttion: z.boolean(),
   battery_voltage: z.bigint(),
   main_power: z.boolean(),
   latitude: z.number(),
@@ -59,7 +60,7 @@ export const vehicleHealthPacketZodSchema = z.object({
 
 export const vehicleDataPacketZodSchema = z.object({
   sln: z.number(),
-  packet_type: z.enum(["NRM", "HLT", "ALT"]),
+  packet_type: z.enum(["NRM", "HLM", "ALT"]),
   imei: z.string(),
   packet: z.string(),
   time_stamp_server: z.date(),
@@ -95,7 +96,6 @@ export type VehicleHealthPacketZodType = z.infer<
 export type VehicleDataPacketZodType = z.infer<
   typeof vehicleDataPacketZodSchema
 >;
-
 
 // Query schemas
 export const VehcileAlertPacketQueryZodSchema = z.object({

@@ -3,6 +3,7 @@ import { asyncErrorHandler } from "../../utils/asyncErrorHandler.js";
 import { AuthMiddleware } from "../../middleware/auth.js";
 import authAccessConfig from "../../config/access.js";
 import vehiclesController from "../../controllers/vehicles/index.js";
+import express from "express";
 
 const vehicleRouter = Router();
 
@@ -46,6 +47,8 @@ vehicleRouter
   .post(
     "/healthpacket/create",
     AuthMiddleware(authAccessConfig.all.auth),
+    express.urlencoded({ extended: true }), // Add URL-encoded parser
+    AuthMiddleware(authAccessConfig.all.auth), // Keep auth after parser
     asyncErrorHandler(vehiclesController.healthpacketCreate),
   )
   .get(
