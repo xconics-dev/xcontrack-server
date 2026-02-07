@@ -7,7 +7,7 @@ import {
   VehicleZodType,
   vehicleHealthPacketZodSchema,
 } from "../../validators/vehicles/index.js";
-import { parseHealthPacket } from "../../utils/parse-healthpacket.js";
+import { generateHealthPacket, parseHealthPacket } from "../../utils/parse-healthpacket.js";
 
 const vehiclesDb = {
   read: async (vehicleNo: string) => {
@@ -291,7 +291,7 @@ const vehiclesDb = {
       throw error;
     }
   },
-  healthpacketCreate: async (
+  healthPacketCreate: async (
     packetInfo: VehicleHealthPacketZodType | string,
   ) => {
     try {
@@ -302,13 +302,35 @@ const vehiclesDb = {
         const parsed = parseHealthPacket(packetInfo);
         data = {
           ...parsed,
-          sln: BigInt(Date.now()), // or use auto-increment/UUID
           time_stamp_server: new Date(),
         };
       } else {
         // Direct object input
         data = packetInfo;
       }
+
+      vehicleHealthPacketZodSchema.parse(data); // Validate
+
+      const healthPacket = await prisma.healthPackets.create({
+        data,
+      });
+      return healthPacket;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(`Validation failed: ${(error as z.ZodError).message}`);
+      }
+      throw error;
+    }
+  },
+  healthPacketTrigger: async (imei: string) => {
+    try {
+      const healthPacketString = generateHealthPacket(imei);
+      const parsed = parseHealthPacket(healthPacketString);
+      const data: VehicleHealthPacketZodType = {
+        ...parsed,
+        // sln: BigInt(Date.now()), // or use auto-increment/UUID
+        time_stamp_server: new Date(),
+      };
 
       vehicleHealthPacketZodSchema.parse(data); // Validate
 

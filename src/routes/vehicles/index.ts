@@ -46,10 +46,9 @@ vehicleRouter
   )
   .post(
     "/healthpacket/create",
-    AuthMiddleware(authAccessConfig.all.auth),
     express.urlencoded({ extended: true }), // Add URL-encoded parser
     AuthMiddleware(authAccessConfig.all.auth), // Keep auth after parser
-    asyncErrorHandler(vehiclesController.healthpacketCreate),
+    asyncErrorHandler(vehiclesController.healthPacketCreate),
   )
   .get(
     "/healthpacket/list",
@@ -65,6 +64,12 @@ vehicleRouter
     "/healthpacket/delete/:sln",
     AuthMiddleware(authAccessConfig.all.auth),
     asyncErrorHandler(vehiclesController.healthPacketDelete),
+  )
+  .post(
+    "/healthpacket/trigger/:imei",
+    express.urlencoded({ extended: true }), // Add URL-encoded parser
+    AuthMiddleware(authAccessConfig.all.auth),
+    asyncErrorHandler(vehiclesController.healthPacketTrigger),
   );
 
 export default vehicleRouter;

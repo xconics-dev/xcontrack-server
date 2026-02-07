@@ -318,3 +318,28 @@ vehiclesRegistry.registerPath({
     },
   },
 });
+
+vehiclesRegistry.registerPath({
+  tags: ["vehicles"],
+  method: "post",
+  path: "/vehicles/healthpacket/trigger/{imei}",
+  summary: "Trigger generation of a health packet for a vehicle by IMEI",
+  security: [{ bearerAuth: [] }], // 🔒 requires JWT
+  request: {
+    params: z.object({ imei: z.string() }),
+  },
+  responses: {
+    200: {
+      description:
+        "Returns details of the newly created health packet for the specified IMEI.",
+      content: {
+        "application/json": {
+          schema: z.object({
+            data: vechileHealthPacketResponseZodSchema, // Replace z.any() with actual health packet schema
+            message: z.string(),
+          }),
+        },
+      },
+    },
+  },
+});

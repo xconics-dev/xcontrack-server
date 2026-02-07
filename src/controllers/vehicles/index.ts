@@ -143,7 +143,7 @@ const vehiclesController = {
       data: healthPacket,
     });
   },
-  healthpacketCreate: async (req: Request, res: Response) => {
+  healthPacketCreate: async (req: Request, res: Response) => {
     try {
       let packetInfo: string | VehicleHealthPacketZodType;
 
@@ -155,7 +155,7 @@ const vehiclesController = {
         packetInfo = req.body;
       }
 
-      const healthPacket = await vehiclesDb.healthpacketCreate(packetInfo);
+      const healthPacket = await vehiclesDb.healthPacketCreate(packetInfo);
 
       // Serialize BigInt fields before response
       const responseData = JSON.parse(
@@ -174,6 +174,33 @@ const vehiclesController = {
           error instanceof Error
             ? error.message
             : "Failed to create health packet",
+      });
+    }
+  },
+  healthPacketTrigger: async (req: Request, res: Response) => {
+    try {
+      const { imei } = req.params;
+      const healthPacket = await vehiclesDb.healthPacketTrigger(imei);
+
+      // Convert BigInts to strings for JSON
+      const serializableData = JSON.parse(
+        JSON.stringify(healthPacket, (key, value) =>
+          typeof value === "bigint" ? value.toString() : value,
+        ),
+      );
+
+      return res.json({
+        message: "health packet triggered successfully",
+        data: serializableData,
+      });
+    } catch (error) {
+      console.error("Health packet trigger error:", error);
+      return res.status(500).json({
+        message: "Failed to trigger health packet",
+        error:
+          process.env.NODE_ENV === "development"
+            ? (error instanceof Error ? error.message : String(error))
+            : "Something went wrong",
       });
     }
   },

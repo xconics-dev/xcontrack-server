@@ -43,7 +43,7 @@ export const vehicleAlertPacketZodSchema = z.object({
 
 
 export const vehicleHealthPacketZodSchema = z.object({
-  sln: z.bigint(),
+  sln: z.bigint().optional(),
   packet_type: z.enum(["NRM", "HLM", "ALT"]),
   imei: z.string(),
   packet: z.string(),
