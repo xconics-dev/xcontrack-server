@@ -7,7 +7,10 @@ import {
   VehicleZodType,
   vehicleHealthPacketZodSchema,
 } from "../../validators/vehicles/index.js";
-import { generateHealthPacket, parseHealthPacket } from "../../utils/parse-healthpacket.js";
+import {
+  generateHealthPacket,
+  parseHealthPacket,
+} from "../../utils/parse-healthpacket.js";
 
 const vehiclesDb = {
   read: async (vehicleNo: string) => {
@@ -140,7 +143,7 @@ const vehiclesDb = {
             ...alert,
             vehicleNo: vehicle?.vehicleNo || "Unknown",
           };
-        })
+        }),
       );
 
       const maxCount = await prisma.alertPackets.count({
@@ -206,6 +209,9 @@ const vehiclesDb = {
 
       const dataPackets = await prisma.dataPackets.findMany({
         where: whereClause,
+        select:{
+          packet: true,
+        },
         skip: offset,
         take: limit,
         orderBy: { time_stamp_server: "desc" },
@@ -233,6 +239,7 @@ const vehiclesDb = {
       throw error;
     }
   },
+
 
   healthPacketList: async (
     imei?: string,

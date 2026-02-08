@@ -198,6 +198,7 @@ vehiclesRegistry.registerPath({
   },
 });
 
+
 // Health packets paths
 vehiclesRegistry.registerPath({
   tags: ["vehicles"],

@@ -38,12 +38,12 @@ vehicleRouter
     AuthMiddleware(authAccessConfig.all.auth),
     asyncErrorHandler(vehiclesController.dataPacketList),
   )
-
   .get(
     "/data/details/:sln",
     AuthMiddleware(authAccessConfig.all.auth),
     asyncErrorHandler(vehiclesController.dataPacketDetails),
   )
+
   .post(
     "/healthpacket/create",
     express.urlencoded({ extended: true }), // Add URL-encoded parser

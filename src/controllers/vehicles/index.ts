@@ -104,6 +104,7 @@ const vehiclesController = {
     });
   },
 
+
   // health packet list
   healthPacketList: async (req: Request, res: Response) => {
     // extract imei
