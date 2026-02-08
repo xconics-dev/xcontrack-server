@@ -51,7 +51,7 @@ export function buildOpenApiDocument() {
     info: { title: "Sriram Demo API", version: "1.0.0" },
     servers: [
       { url: `http://localhost:${Config.PORT}` },
-      { url: `http://172.105.36.66:8020` },
+      { url: `http://172.105.61.24:8020` },
     ],
   });
 }

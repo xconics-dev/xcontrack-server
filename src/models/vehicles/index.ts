@@ -108,7 +108,7 @@ const vehiclesDb = {
   ) => {
     try {
       const whereClause: Prisma.AlertPacketsWhereInput = {
-        imei,
+        ...(imei && { imei }),
         OR: search
           ? [
               {
@@ -117,12 +117,6 @@ const vehiclesDb = {
                   mode: Prisma.QueryMode.insensitive,
                 },
               },
-              //   {
-              //     mqtt_topic: {
-              //       contains: search,
-              //       mode: Prisma.QueryMode.insensitive,
-              //     },
-              //   },
             ]
           : undefined,
       };
@@ -134,12 +128,27 @@ const vehiclesDb = {
         orderBy: { time_stamp_server: "desc" },
       });
 
+      const enrichedAlerts = await Promise.all(
+        alerts.map(async (alert) => {
+          const vehicle = alert.imei
+            ? await prisma.installationRequisition.findFirst({
+                where: { device: { imei: alert.imei } },
+                select: { vehicleNo: true },
+              })
+            : null;
+          return {
+            ...alert,
+            vehicleNo: vehicle?.vehicleNo || "Unknown",
+          };
+        })
+      );
+
       const maxCount = await prisma.alertPackets.count({
         where: whereClause,
       });
 
       return {
-        alerts,
+        alerts: enrichedAlerts,
         maxPage: Math.ceil(maxCount / limit),
       };
     } catch (error) {

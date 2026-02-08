@@ -43,6 +43,7 @@ const vehiclesController = {
       VehcileAlertPacketQueryZodSchema.parse(req.query);
     // db call
     const alerts = await vehiclesDb.alertsList(imei, search, offset, limit);
+    
     // send response
     return res.json({
       message: "alerts list successfully",

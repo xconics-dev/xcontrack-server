@@ -130,6 +130,7 @@ export const vehicleResponseZodSchema = vehicleDataZodSchema.extend({
 export const vechileAlertPacketResponseZodSchema =
   vehicleAlertPacketZodSchema.extend({
     id: uuidZodSchemaGen("id"),
+    vehicleNo: z.string().optional(),
     ...extraFields,
   });
 
