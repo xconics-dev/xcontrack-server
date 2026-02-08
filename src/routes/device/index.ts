@@ -30,7 +30,7 @@ deviceRouter
   )
   .get(
     "/list",
-    AuthMiddleware(deviceAuthConfig.read.auth),
+    AuthMiddleware(deviceAuthConfig.list.auth),
     asyncErrorHandler(deviceController.list)
   );
 

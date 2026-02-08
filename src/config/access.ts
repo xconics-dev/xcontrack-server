@@ -110,6 +110,9 @@ type AuthAccessConfigType = {
     delete: {
       auth: userType[];
     };
+    list:{
+      auth: userType[];
+    }
   };
   deviceMovement: {
     create: {
@@ -294,14 +297,17 @@ const authAccessConfig: AuthAccessConfigType = {
       auth: ["XCONICS"],
     },
     read: {
-      auth: ["XCONICS", "AGGREGATOR"],
+      auth: ["XCONICS", "AGGREGATOR", "FIELD_ENGINEER"],
     },
     update: {
       auth: ["XCONICS", "FIELD_ENGINEER"],
     },
     delete: {
-      auth: ["XCONICS"],
+      auth: ["XCONICS", "FIELD_ENGINEER"],
     },
+    list:{
+      auth: ["XCONICS", "AGGREGATOR", "LENDER", "FIELD_ENGINEER"],
+    }
   },
   deviceMovement: {
     create: {
