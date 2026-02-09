@@ -209,7 +209,14 @@ const vehiclesDb = {
 
       const dataPackets = await prisma.dataPackets.findMany({
         where: whereClause,
-        select:{
+        select: {
+          sln: true,
+          latitude: true,
+          longitude: true,
+          main_power: true,
+          network_strength: true,
+          speed: true,
+          // battery_voltage: true,
           packet: true,
         },
         skip: offset,
@@ -239,7 +246,6 @@ const vehiclesDb = {
       throw error;
     }
   },
-
 
   healthPacketList: async (
     imei?: string,
@@ -271,6 +277,19 @@ const vehiclesDb = {
       const healthPackets = await prisma.healthPackets.findMany({
         where: whereClause,
         skip: offset,
+        select: {
+          packet: false,
+          connection: true,
+          imei: true,
+          latitude: true,
+          longitude: true,
+          main_power: true,
+          epoch_time: true,
+          time_stamp_server: true,
+          sln: false,
+          packet_type: false,
+          battery_voltage: false,
+        },
         take: limit,
         orderBy: { time_stamp_server: "desc" },
       });

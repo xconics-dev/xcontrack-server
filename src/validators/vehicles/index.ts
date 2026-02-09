@@ -48,7 +48,7 @@ export const vehicleHealthPacketZodSchema = z.object({
   imei: z.string(),
   packet: z.string(),
   time_stamp_server: z.date(),
-  connecttion: z.boolean(),
+  connection: z.boolean(),
   battery_voltage: z.bigint(),
   main_power: z.boolean(),
   latitude: z.number(),

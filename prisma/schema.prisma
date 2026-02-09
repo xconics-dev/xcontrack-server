@@ -492,29 +492,29 @@ model AlertPackets {
 }
 
 model DataPackets {
-  sln               Int       @id(map: "data_packets_pkey") @default(autoincrement())
-  packet_type       String?   @db.VarChar
-  imei              String    @db.VarChar(15)
-  packet            String?   @db.VarChar
-  time_stamp_server DateTime? @default(now()) @db.Timestamptz(6)
-  processed         Boolean
-  mqtt_topic        String?   @db.VarChar
-  battery_voltage   BigInt?
-  main_power        Boolean?
-  epoch_time        Decimal?  @db.Decimal
-  latitude          Float?
-  longitude         Float?
-  satelite          String?   @db.VarChar
-  speed             String?   @db.VarChar
-  cog               String?   @db.VarChar
-  network_strength  Int?      @db.SmallInt
-  altitude          String?   @db.VarChar
-  custom_field1     String?   @db.VarChar
-  custom_field2     String?   @db.VarChar
-  custom_field3     String?   @db.VarChar
-  custom_field4     String?   @db.VarChar
-  custom_field5     String?   @db.VarChar
-  column_field6     String?   @db.VarChar
+  sln                Int       @id(map: "data_packets_pkey") @default(autoincrement())
+  packet_type        String?   @db.VarChar
+  imei               String    @db.VarChar(15)
+  packet             String?   @db.VarChar
+  time_stamp_server  DateTime? @default(now()) @db.Timestamptz(6)
+  processed          Boolean
+  mqtt_topic         String?   @db.VarChar
+  battery_voltage    BigInt?
+  main_power         Boolean?
+  epoch_time         Decimal?  @db.Decimal
+  latitude           Float?
+  longitude          Float?
+  satelite           String?   @db.VarChar
+  speed              String?   @db.VarChar
+  cog                String?   @db.VarChar
+  network_strength   Int?      @db.SmallInt
+  altitude           String?   @db.VarChar
+  jerk_status        String?   @db.VarChar
+  current_jerk_value String?   @db.VarChar
+  ignition_status    String?   @db.VarChar
+  custom_field1      String?   @db.VarChar
+  custom_field2      String?   @db.VarChar
+  column_field3      String?   @db.VarChar
 
   @@index([imei], map: "ix_datapackets_imei")
   @@index([packet_type], map: "ix_datapackets_packet_type")
@@ -528,7 +528,7 @@ model HealthPackets {
   imei              String?   @db.VarChar
   packet            String?   @db.VarChar
   time_stamp_server DateTime? @default(now()) @db.Timestamptz(6)
-  connecttion       Boolean?
+  connection        Boolean?
   battery_voltage   BigInt?
   main_power        Boolean?
   latitude          Float?
