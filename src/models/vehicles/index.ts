@@ -217,6 +217,7 @@ const vehiclesDb = {
           network_strength: true,
           speed: true,
           // battery_voltage: true,
+          time_stamp_server: true,
           packet: true,
         },
         skip: offset,
