@@ -218,6 +218,7 @@ const vehiclesDb = {
           speed: true,
           // battery_voltage: true,
           time_stamp_server: true,
+          ignition_status: true,
           packet: true,
         },
         skip: offset,
