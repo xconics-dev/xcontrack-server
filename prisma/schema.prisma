@@ -536,6 +536,17 @@ model HealthPackets {
   epoch_time        Decimal?  @db.Decimal
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model DeviceIgnitionOffRecord {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  imei                String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime? @default(now()) @db.Timestamp(6)
+  vehicleNo           String?
+  ignitionOffDuration Decimal?  @db.Decimal
+  
+}
+
 enum LenderType {
   NBFC
   BANK

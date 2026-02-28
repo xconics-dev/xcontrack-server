@@ -49,6 +49,7 @@ export const extraFields = {
 };
 
 export const commonQueryParamsZodSchema = z.object({
+  imei: z.string().optional(),
   search: z
     .string({ error: "Please enter valid search string" })
     .optional()

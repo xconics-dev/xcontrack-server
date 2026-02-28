@@ -1,6 +1,7 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { z } from "../validators/index.js";
 import {
+  DeviceIgnitionOffRecord,
   vechileAlertPacketResponseZodSchema,
   vechileDataPacketResponseZodSchema,
   vechileHealthPacketResponseZodSchema,
@@ -16,7 +17,10 @@ export const vehiclesRegistry = new OpenAPIRegistry();
 
 // Components
 vehiclesRegistry.register("vehicleResponse", vehicleResponseZodSchema);
-vehiclesRegistry.register("vechileAlertPacketResponse", vechileAlertPacketResponseZodSchema);
+vehiclesRegistry.register(
+  "vechileAlertPacketResponse",
+  vechileAlertPacketResponseZodSchema,
+);
 vehiclesRegistry.register(
   "vechileHealthPacketResponse",
   vechileHealthPacketResponseZodSchema,
@@ -73,7 +77,6 @@ vehiclesRegistry.registerPath({
     },
   },
 });
-
 
 // Alert packets paths
 vehiclesRegistry.registerPath({
@@ -198,7 +201,6 @@ vehiclesRegistry.registerPath({
   },
 });
 
-
 // Health packets paths
 vehiclesRegistry.registerPath({
   tags: ["vehicles"],
@@ -211,11 +213,13 @@ vehiclesRegistry.registerPath({
       content: {
         "application/x-www-form-urlencoded": {
           schema: z.object({
-            packet: z.string()
+            packet: z.string(),
           }),
         },
-        "application/json": { 
-          schema: vehicleHealthPacketZodSchema.describe("Full structured health packet object") 
+        "application/json": {
+          schema: vehicleHealthPacketZodSchema.describe(
+            "Full structured health packet object",
+          ),
         },
       },
     },
@@ -245,14 +249,13 @@ vehiclesRegistry.registerPath({
   },
 });
 
-
 vehiclesRegistry.registerPath({
   tags: ["vehicles"],
   method: "get",
   path: "/vehicles/healthpacket/list",
   summary: "List health packets for a vehicle by IMEI",
   security: [{ bearerAuth: [] }], // 🔒 requires JWT
-  request:{
+  request: {
     query: VehcileHealthPacketQueryZodSchema,
   },
   responses: {
@@ -337,6 +340,31 @@ vehiclesRegistry.registerPath({
         "application/json": {
           schema: z.object({
             data: vechileHealthPacketResponseZodSchema, // Replace z.any() with actual health packet schema
+            message: z.string(),
+          }),
+        },
+      },
+    },
+  },
+});
+
+vehiclesRegistry.registerPath({
+  tags: ["vehicles"],
+  method: "get",
+  path: "/vehicles/ignitionoffrecords/list",
+  summary: "List ignition-off records for a vehicle by IMEI",
+  security: [{ bearerAuth: [] }], // 🔒 requires JWT
+  request: {
+    query: commonQueryParamsZodSchema, // Reusing common query params schema which includes imei, offset, limit, search
+  },
+  responses: {
+    200: {
+      description:
+        "Returns list of ignition-off records for the specified IMEI.",
+      content: {
+        "application/json": {
+          schema: z.object({
+            data: z.array(DeviceIgnitionOffRecord), // Replace z.any() with actual ignition-off record schema
             message: z.string(),
           }),
         },

@@ -70,6 +70,11 @@ vehicleRouter
     express.urlencoded({ extended: true }), // Add URL-encoded parser
     AuthMiddleware(authAccessConfig.all.auth),
     asyncErrorHandler(vehiclesController.healthPacketTrigger),
-  );
+  )
+  .get(
+    "/ignitionoffrecords/list",
+    AuthMiddleware(authAccessConfig.all.auth),
+    asyncErrorHandler(vehiclesController.ignitionOffRecordList),
+  )
 
 export default vehicleRouter;

@@ -43,7 +43,7 @@ const vehiclesController = {
       VehcileAlertPacketQueryZodSchema.parse(req.query);
     // db call
     const alerts = await vehiclesDb.alertsList(imei, search, offset, limit);
-    
+
     // send response
     return res.json({
       message: "alerts list successfully",
@@ -103,7 +103,6 @@ const vehiclesController = {
       data: dataPacket,
     });
   },
-
 
   // health packet list
   healthPacketList: async (req: Request, res: Response) => {
@@ -201,10 +200,32 @@ const vehiclesController = {
         message: "Failed to trigger health packet",
         error:
           process.env.NODE_ENV === "development"
-            ? (error instanceof Error ? error.message : String(error))
+            ? error instanceof Error
+              ? error.message
+              : String(error)
             : "Something went wrong",
       });
     }
+  },
+
+  // ignitionOffRecordList
+  ignitionOffRecordList: async (req: Request, res: Response) => {
+    // extract imei
+    const { imei, search, offset, limit } = commonQueryParamsZodSchema.parse(
+      req.query,
+    );
+    // db call
+    const records = await vehiclesDb.ignitionOffRecordList(
+      imei,
+      search,
+      offset,
+      limit,
+    );
+    // send response
+    return res.json({
+      message: "ignition-off records list successfully",
+      data: records,
+    });
   },
 };
 

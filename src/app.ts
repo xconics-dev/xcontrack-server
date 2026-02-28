@@ -22,6 +22,7 @@ import installationRequisitionRouter from "./routes/installationRequisition/inde
 import deviceTrackingRouter from "./routes/deviceTracking/index.js";
 import supportTicketRouter from "./routes/supportTicket/index.js";
 import vehicleRouter from "./routes/vehicles/index.js";
+import { scheduleJerkIgnitionSync } from "./cron/vehicle-ignition.js";
 
 const app = express();
 
@@ -54,7 +55,7 @@ app.use("/installationRequisition", installationRequisitionRouter);
 app.use("/deviceTracking", deviceTrackingRouter);
 app.use("/supportTicket", supportTicketRouter);
 
-//new 
+//new
 app.use("/vehicles", vehicleRouter);
 
 const document = buildOpenApiDocument();
@@ -66,6 +67,10 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(statusCodes.serverError).json({ error: "Something went wrong" });
 });
 
+// ── Start server + cron jobs ──────────────────────────────────────────────────
 app.listen(Config.PORT, () => {
   console.log(`Listening on port ${Config.PORT}`);
+
+  // node-cron tasks auto-start — no need to call .start()
+  scheduleJerkIgnitionSync();
 });

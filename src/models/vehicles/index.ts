@@ -383,6 +383,48 @@ const vehiclesDb = {
       throw error;
     }
   },
+
+  // ignition off records paths
+  ignitionOffRecordList: async (
+    imei?: string,
+    search?: string,
+    offset: number = 0,
+    limit: number = Config.PAGE_ITEM_COUNT,
+  ) => {
+    try {
+      const whereClause: Prisma.DeviceIgnitionOffRecordWhereInput = {
+        imei,
+        OR: search
+          ? [
+              {
+                vehicleNo: {
+                  contains: search,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+            ]
+          : undefined,
+      };
+
+      const records = await prisma.deviceIgnitionOffRecord.findMany({
+        where: whereClause,
+        skip: offset,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+      });
+
+      const maxCount = await prisma.deviceIgnitionOffRecord.count({
+        where: whereClause,
+      });
+
+      return {
+        records,
+        maxPage: Math.ceil(maxCount / limit),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 export default vehiclesDb;

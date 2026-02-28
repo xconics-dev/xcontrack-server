@@ -41,7 +41,6 @@ export const vehicleAlertPacketZodSchema = z.object({
   epoch_time: z.number(),
 });
 
-
 export const vehicleHealthPacketZodSchema = z.object({
   sln: z.bigint().optional(),
   packet_type: z.enum(["NRM", "HLM", "ALT"]),
@@ -55,8 +54,6 @@ export const vehicleHealthPacketZodSchema = z.object({
   longitude: z.number(),
   epoch_time: z.number(),
 });
-
-
 
 export const vehicleDataPacketZodSchema = z.object({
   sln: z.number(),
@@ -73,16 +70,28 @@ export const vehicleDataPacketZodSchema = z.object({
   longitude: z.number().optional(),
   satelite: z.string().optional(),
   speed: z.string().optional(),
+  current_jerk_value: z.string().optional(),
+  ignition_status: z.string().optional(),
   cog: z.string().optional(),
   network_strength: z.number().optional(),
   altitude: z.string().optional(),
+  jerk_status: z.string().optional(),
   custom_field1: z.string().optional(),
   custom_field2: z.string().optional(),
   custom_field3: z.string().optional(),
-  custom_field4: z.string().optional(),
-  custom_field5: z.string().optional(),
-  column_field6: z.string().optional(),
+  
 });
+
+export const DeviceIgnitionOffRecord = z.object({
+  id: z.string(),
+  imei: z.string().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date().optional(),
+  vehicleNo: z.string().optional(),
+  ignitionOffDuration: z.number().optional(),
+});
+
+
 
 /* ================= TYPES ================= */
 
@@ -105,7 +114,6 @@ export const VehcileAlertPacketQueryZodSchema = z.object({
   imei: z.string().optional(),
 });
 
-
 export const VehcileDataPacketQueryZodSchema = z.object({
   offset: z.coerce.number().min(0).default(0).optional(),
   limit: z.coerce.number().min(1).default(Config.PAGE_ITEM_COUNT).optional(),
@@ -118,6 +126,13 @@ export const VehcileHealthPacketQueryZodSchema = z.object({
   limit: z.coerce.number().min(1).default(Config.PAGE_ITEM_COUNT).optional(),
   search: z.string().optional(),
   imei: z.string().optional(),
+});
+
+export const commonQueryParamsZodSchema = z.object({
+  imei: z.string().optional(),
+  offset: z.coerce.number().min(0).default(0).optional(),
+  limit: z.coerce.number().min(1).default(Config.PAGE_ITEM_COUNT).optional(),
+  search: z.string().optional(),
 });
 
 /* ================= RESPONSE ================= */
